@@ -12,7 +12,7 @@ from app.models.enums import UserRole
 
 if TYPE_CHECKING:
     from app.models.alert import Alert
-    from app.models.token import Token
+    from app.models.refresh_token import RefreshToken
     from app.models.watchlist import Watchlist
 
 
@@ -35,7 +35,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         Boolean, default=True, nullable=False
     )
 
-    tokens: Mapped[list["Token"]] = relationship(
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
         passive_deletes=True,

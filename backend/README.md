@@ -174,7 +174,57 @@ curl -X POST http://localhost:8000/auth/token \
 * Swagger **Authorize** uses `POST /auth/token` (OAuth2 password flow); the
   `username` field is your email. All other responses use the standard envelope.
 
+## Token catalogue & live prices (Phase 2)
+
+The crypto **Token catalogue** is admin-managed and seeded from CoinGecko. Prices
+are served through a **read-through Redis cache** (TTL = `PRICE_CACHE_TTL_SEC`).
+
+> Naming note: the Phase 1 auth refresh-token model is now `RefreshToken`
+> (table `refresh_tokens`); the `Token` model / `tokens` table is the catalogue.
+
+### Endpoints (all under `/api/v1/tokens`)
+
+| Method & path | Access | Notes |
+|---|---|---|
+| `GET /api/v1/tokens` | any authenticated user | paginated (`page`, `size`), active tokens only |
+| `GET /api/v1/tokens/{id}/price` | any authenticated user | `cached=true/false`; Redis → CoinGecko fallback |
+| `POST /api/v1/tokens` | **admin only** | add a catalogue token |
+| `PATCH /api/v1/tokens/{id}` | **admin only** | update `symbol`/`name`/`is_active` |
+
+```bash
+# list (auth required)
+curl "http://localhost:8000/api/v1/tokens?page=1&size=20" -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+# live price (cached flag in the payload)
+curl "http://localhost:8000/api/v1/tokens/<TOKEN_ID>/price" -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+# admin: add a token
+curl -X POST http://localhost:8000/api/v1/tokens \
+  -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>" -H "Content-Type: application/json" \
+  -d '{"symbol":"BTC","name":"Bitcoin","coingecko_id":"bitcoin"}'
+```
+
+### Seed the database
+
+Creates an admin user, a demo user, and pulls the top-100 CoinGecko tokens into
+the catalogue. **Idempotent** — safe to re-run.
+
+```powershell
+# from backend/
+.\venv\Scripts\python.exe -m scripts.seed
+```
+
+Default seeded credentials (override via `.env`):
+`admin@watchtower.dev` / `ChangeMeAdmin123!` and `demo@watchtower.dev` / `ChangeMeDemo123!`.
+
+### Run the tests
+
+```powershell
+# from backend/  (uses the live Postgres + Redis; each test runs in a rolled-back transaction)
+.\venv\Scripts\python.exe -m pytest -q
+```
+
 ## Out of scope for this phase
 
-Watchlist CRUD, token catalogue, and alert evaluation are intentionally **not**
-implemented yet — only their tables exist so the schema is provisioned.
+Watchlist CRUD and alert evaluation are intentionally **not** implemented yet —
+only their tables exist so the schema is provisioned.

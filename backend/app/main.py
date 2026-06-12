@@ -27,7 +27,7 @@ from app.core.logging import configure_logging, get_logger
 from app.core.rate_limit import limiter
 from app.db.redis import close_redis
 from app.db.session import dispose_engine
-from app.routers import auth, health
+from app.routers import auth, health, tokens
 
 configure_logging()
 logger = get_logger(__name__)
@@ -55,6 +55,14 @@ tags_metadata = [
     {
         "name": "auth",
         "description": "Registration, login, token refresh and current-user lookup.",
+    },
+    {
+        "name": "tokens",
+        "description": (
+            "Crypto token catalogue and live, Redis-cached prices. Listing is "
+            "open to any authenticated user; creating/updating catalogue entries "
+            "is admin-only."
+        ),
     },
 ]
 
@@ -93,6 +101,7 @@ register_exception_handlers(app)
 # --- Routers ------------------------------------------------------------- #
 app.include_router(health.router)
 app.include_router(auth.router)
+app.include_router(tokens.router)
 
 
 @app.get("/", tags=["health"], summary="Service banner")

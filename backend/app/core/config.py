@@ -50,6 +50,29 @@ class Settings(BaseSettings):
         default="https://api.coingecko.com/api/v3",
         alias="COINGECKO_BASE",
     )
+    coingecko_api_key: str | None = Field(
+        default=None, alias="COINGECKO_API_KEY"
+    )
+    coingecko_timeout_sec: float = Field(
+        default=10.0, alias="COINGECKO_TIMEOUT_SEC"
+    )
+    coingecko_max_retries: int = Field(
+        default=3, alias="COINGECKO_MAX_RETRIES"
+    )
+    price_vs_currency: str = Field(default="usd", alias="PRICE_VS_CURRENCY")
+    top_tokens_count: int = Field(default=100, alias="TOP_TOKENS_COUNT")
+
+    # --- Seed credentials -------------------------------------------------
+    admin_email: str = Field(
+        default="admin@watchtower.dev", alias="ADMIN_EMAIL"
+    )
+    admin_password: str = Field(
+        default="ChangeMeAdmin123!", alias="ADMIN_PASSWORD"
+    )
+    demo_email: str = Field(default="demo@watchtower.dev", alias="DEMO_EMAIL")
+    demo_password: str = Field(
+        default="ChangeMeDemo123!", alias="DEMO_PASSWORD"
+    )
 
     # --- CORS ------------------------------------------------------------
     # ``NoDecode`` disables pydantic-settings' default JSON decoding so the

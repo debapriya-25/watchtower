@@ -10,6 +10,7 @@ from __future__ import annotations
 from app.db.base import Base
 from app.models.alert import Alert
 from app.models.enums import AlertCondition, AlertStatus, UserRole
+from app.models.refresh_token import RefreshToken
 from app.models.token import Token
 from app.models.user import User
 from app.models.watchlist import Watchlist
@@ -18,6 +19,7 @@ from app.models.watchlist_item import WatchlistItem
 __all__ = [
     "Base",
     "User",
+    "RefreshToken",
     "Token",
     "Watchlist",
     "WatchlistItem",

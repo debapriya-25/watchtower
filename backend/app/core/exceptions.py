@@ -136,6 +136,17 @@ async def sqlalchemy_exception_handler(
     )
 
 
+async def coingecko_exception_handler(
+    request: Request, exc: "CoinGeckoError"
+) -> JSONResponse:
+    logger.error("upstream_price_error", path=request.url.path, error=str(exc))
+    return error_response(
+        message="The price provider is currently unavailable. Please retry.",
+        code="upstream_unavailable",
+        status_code=status.HTTP_502_BAD_GATEWAY,
+    )
+
+
 async def unhandled_exception_handler(
     request: Request, exc: Exception
 ) -> JSONResponse:
@@ -154,4 +165,8 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RateLimitExceeded, rate_limit_handler)  # type: ignore[arg-type]
     app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # type: ignore[arg-type]
     app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)  # type: ignore[arg-type]
+    # Imported here to avoid a module-load cycle (services import core.*).
+    from app.services.coingecko import CoinGeckoError
+
+    app.add_exception_handler(CoinGeckoError, coingecko_exception_handler)  # type: ignore[arg-type]
     app.add_exception_handler(Exception, unhandled_exception_handler)

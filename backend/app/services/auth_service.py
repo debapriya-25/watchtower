@@ -21,7 +21,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
-from app.models.token import Token
+from app.models.refresh_token import RefreshToken
 from app.models.user import User
 from app.schemas.auth import TokenPair
 
@@ -50,7 +50,9 @@ async def _issue_token_pair(db: AsyncSession, user: User) -> TokenPair:
         subject=str(user.id)
     )
 
-    db.add(Token(user_id=user.id, jti=refresh_jti, expires_at=refresh_exp))
+    db.add(
+        RefreshToken(user_id=user.id, jti=refresh_jti, expires_at=refresh_exp)
+    )
     await db.flush()
 
     return TokenPair(
@@ -129,7 +131,9 @@ async def refresh_tokens(db: AsyncSession, *, refresh_token: str) -> TokenPair:
     if not jti or not subject:
         raise AuthenticationError("Invalid refresh token payload.")
 
-    result = await db.execute(select(Token).where(Token.jti == jti))
+    result = await db.execute(
+        select(RefreshToken).where(RefreshToken.jti == jti)
+    )
     stored = result.scalar_one_or_none()
     if stored is None or stored.revoked:
         raise AuthenticationError("Refresh token has been revoked.")
