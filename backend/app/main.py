@@ -27,7 +27,7 @@ from app.core.logging import configure_logging, get_logger
 from app.core.rate_limit import limiter
 from app.db.redis import close_redis
 from app.db.session import dispose_engine
-from app.routers import alerts, auth, health, tokens, watchlists
+from app.routers import admin, alerts, auth, health, tokens, watchlists
 
 configure_logging()
 logger = get_logger(__name__)
@@ -80,6 +80,13 @@ tags_metadata = [
             "Notification delivery is not part of this phase."
         ),
     },
+    {
+        "name": "admin",
+        "description": (
+            "Administrator-only user management: list all users and "
+            "activate/deactivate accounts. Non-admins receive 403."
+        ),
+    },
 ]
 
 app = FastAPI(
@@ -120,6 +127,7 @@ app.include_router(auth.router)
 app.include_router(tokens.router)
 app.include_router(watchlists.router)
 app.include_router(alerts.router)
+app.include_router(admin.router)
 
 
 @app.get("/", tags=["health"], summary="Service banner")
