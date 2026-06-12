@@ -4,11 +4,29 @@ A secure, scalable crypto **watchlist & price-alert API** (FastAPI · PostgreSQL
 Redis). This repository contains the backend (`backend/`) and a containerized
 local stack (Docker Compose).
 
-- API/feature documentation: [`backend/README.md`](backend/README.md)
-- Product/architecture docs: [`docs/`](docs/)
-
 The fastest way to run the whole thing is Docker Compose (below). To run the API
 directly in a Python venv instead, see [`backend/README.md`](backend/README.md).
+
+### Documentation map
+
+| Doc | What's in it |
+|---|---|
+| [`backend/README.md`](backend/README.md) | API/feature reference, endpoints, local venv run, tests |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System/architecture diagrams (Mermaid), data model, request lifecycle |
+| [`SCALABILITY.md`](SCALABILITY.md) | Scaling strategy: stateless API, Redis cache, indexing, next steps |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Env vars, local Docker, and cloud deploy (Render/Neon/Upstash) |
+| [`docs/watchtower.postman_collection.json`](docs/watchtower.postman_collection.json) | Importable Postman collection (see *API testing* below) |
+| [`docs/PRD.md`](docs/PRD.md) · [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) · [`docs/TECH_STACK.md`](docs/TECH_STACK.md) | Product & planning docs |
+
+### API testing (Swagger / Postman)
+
+- **Swagger UI** — always live at `/docs` (e.g. http://localhost:8000/docs);
+  click **Authorize**, enter your email as `username` + password.
+- **Postman** — either:
+  1. Import [`docs/watchtower.postman_collection.json`](docs/watchtower.postman_collection.json),
+     then set the collection variables `baseUrl` and `accessToken` (get a token
+     from `POST /auth/login` → `data.tokens.access_token`); or
+  2. Import the live spec directly: *Import → Link →* `http://localhost:8000/openapi.json`.
 
 ---
 

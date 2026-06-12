@@ -27,9 +27,6 @@ build/
 .vscode/
 .idea/
 
-# Documentation (local project docs)
-docs/
-
 # Logs
 *.log
 
@@ -40,3 +37,7 @@ redis_data/
 # OS files
 .DS_Store
 Thumbs.db
+
+docs/IMPLEMENTATION_PLAN.md
+docs/PRD.md
+docs/TECH_STACK.md

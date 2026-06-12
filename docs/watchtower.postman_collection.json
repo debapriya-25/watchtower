@@ -1,0 +1,792 @@
+{
+  "info": {
+    "name": "Watchtower API",
+    "description": "Crypto watchlist & price-alert API. Set collection variables `baseUrl` and `accessToken` (obtain via POST /auth/login -> data.tokens.access_token). All responses use the {success,data,error} envelope.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "health",
+      "item": [
+        {
+          "name": "Liveness & readiness probe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Reports overall service health along with PostgreSQL and Redis connectivity. Returns **200** when all components are reachable and **503** otherwise.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Service banner",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "Minimal root endpoint returning the standard envelope.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "Register a new account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"full_name\": \"Alice Example\",\n  \"password\": \"S3curePass!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Authenticate and obtain tokens",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"S3curePass!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "OAuth2 password token endpoint (used by Swagger 'Authorize')",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            },
+            "description": "Standard OAuth2 password-flow token endpoint. Accepts a form body (`username` = email, `password`) and returns a top-level `access_token`/`token_type` so the Swagger **Authorize** button works. Application clients should use `POST /auth/login` instead, which returns the standard `{success, data, error}` envelope. This endpoint intentionally returns the raw OAuth2 token shape (not the envelope) because that is what the OAuth2 spec and Swagger UI require.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Rotate a refresh token for a new token pair",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get the currently authenticated user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "tokens",
+      "item": [
+        {
+          "name": "List active catalogue tokens",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tokens?page=&size=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tokens"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns a paginated list of **active** catalogue tokens, ordered by symbol. Available to any authenticated user."
+          }
+        },
+        {
+          "name": "Add a token to the catalogue (admin only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tokens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tokens"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coingecko_id\": \"bitcoin\",\n  \"is_active\": true,\n  \"name\": \"Bitcoin\",\n  \"symbol\": \"BTC\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get a token's live (cached) price",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tokens/:token_id/price",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tokens",
+                ":token_id",
+                "price"
+              ]
+            },
+            "description": "Resolves the token's current price through a **read-through Redis cache**. On a cache hit the cached value is returned with `cached=true`; on a miss the price is fetched from CoinGecko, cached for `PRICE_CACHE_TTL_SEC` seconds, and returned with `cached=false`."
+          }
+        },
+        {
+          "name": "Update a catalogue token (admin only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tokens/:token_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tokens",
+                ":token_id"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "watchlists",
+      "item": [
+        {
+          "name": "List my watchlists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/watchlists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "watchlists"
+              ]
+            },
+            "description": "Returns the current user's watchlists (with token counts). Never includes other users' watchlists."
+          }
+        },
+        {
+          "name": "Create a watchlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/watchlists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "watchlists"
+              ]
+            },
+            "description": "Creates a new, empty watchlist owned by the current user. Watchlist names must be unique per user.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"DeFi blue chips\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get one of my watchlists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/watchlists/:watchlist_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "watchlists",
+                ":watchlist_id"
+              ]
+            },
+            "description": "Returns a single watchlist (with its tokens). Returns 403 if the watchlist belongs to another user, 404 if it does not exist."
+          }
+        },
+        {
+          "name": "Rename a watchlist",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/watchlists/:watchlist_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "watchlists",
+                ":watchlist_id"
+              ]
+            },
+            "description": "Renames an owned watchlist. Returns 403 for another user's watchlist, 409 on a duplicate name.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Long-term holds\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete a watchlist",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/watchlists/:watchlist_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "watchlists",
+                ":watchlist_id"
+              ]
+            },
+            "description": "Deletes an owned watchlist and all of its token items. Returns 403 for another user's watchlist."
+          }
+        },
+        {
+          "name": "Add a token to a watchlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/watchlists/:watchlist_id/tokens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "watchlists",
+                ":watchlist_id",
+                "tokens"
+              ]
+            },
+            "description": "Adds a catalogue token to an owned watchlist. The token must exist in the catalogue (404 otherwise) and may not already be present (409 otherwise).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove a token from a watchlist",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/watchlists/:watchlist_id/tokens/:token_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "watchlists",
+                ":watchlist_id",
+                "tokens",
+                ":token_id"
+              ]
+            },
+            "description": "Removes a token from an owned watchlist. Returns 404 if the token is not in the watchlist."
+          }
+        }
+      ]
+    },
+    {
+      "name": "alerts",
+      "item": [
+        {
+          "name": "List my alerts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts"
+              ]
+            },
+            "description": "Returns the current user's alerts (newest first). Never includes other users' alerts."
+          }
+        },
+        {
+          "name": "Create a price alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts"
+              ]
+            },
+            "description": "Creates an alert that triggers when the token's price crosses `target_price` in the given direction. The token must exist in the catalogue (404 otherwise) and `target_price` must be > 0 (422 otherwise). New alerts start active and un-triggered.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condition\": \"ABOVE\",\n  \"target_price\": 75000.0,\n  \"token_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get one of my alerts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/:alert_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                ":alert_id"
+              ]
+            },
+            "description": "Returns a single alert. 403 if it belongs to another user, 404 if it does not exist."
+          }
+        },
+        {
+          "name": "Update an alert",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/:alert_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                ":alert_id"
+              ]
+            },
+            "description": "Updates an owned alert's `condition` and/or `target_price` (must stay > 0). Use activate/deactivate to toggle active state.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condition\": \"ABOVE\",\n  \"target_price\": 80000.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete an alert",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/:alert_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                ":alert_id"
+              ]
+            },
+            "description": "Deletes an owned alert. 403 for another user's alert."
+          }
+        },
+        {
+          "name": "Activate (re-arm) an alert",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/:alert_id/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                ":alert_id",
+                "activate"
+              ]
+            },
+            "description": "Sets `is_active=true` and clears `triggered_at` so the alert can fire again."
+          }
+        },
+        {
+          "name": "Deactivate an alert",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/:alert_id/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                ":alert_id",
+                "deactivate"
+              ]
+            },
+            "description": "Sets `is_active=false`. The alert will not trigger until re-activated."
+          }
+        }
+      ]
+    },
+    {
+      "name": "admin",
+      "item": [
+        {
+          "name": "List all users (admin only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users?page=&size=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns a paginated list of every user account, newest first. Restricted to administrators; authenticated non-admins receive 403. Each entry exposes `id`, `email`, `role`, `is_active`, `created_at` and `updated_at` (never the password hash)."
+          }
+        },
+        {
+          "name": "Activate or deactivate a user (admin only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/:user_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                ":user_id"
+              ]
+            },
+            "description": "Sets a user's `is_active` flag. Deactivated users can no longer authenticate. Restricted to administrators (403 for non-admins); returns 404 if the user does not exist.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -26,9 +26,14 @@ from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 from app.core.security import create_access_token, hash_password  # noqa: E402
 from app.db.redis import get_redis  # noqa: E402
 from app.db.session import engine, get_db  # noqa: E402
+from app.core.rate_limit import limiter  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.enums import UserRole  # noqa: E402
 from app.models.user import User  # noqa: E402
+
+# Rate limiting is verified manually; disable it during tests so the shared
+# client IP doesn't exhaust the per-minute auth limits across test cases.
+limiter.enabled = False
 
 
 class FakeRedis:
