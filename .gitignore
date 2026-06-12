@@ -1,0 +1,26 @@
+# Python
+backend/venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment files
+.env
+backend/.env
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# Frontend
+node_modules/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+docs/
