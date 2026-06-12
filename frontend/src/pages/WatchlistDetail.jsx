@@ -55,10 +55,21 @@ export default function WatchlistDetail() {
     if (!selectedToken) return
     setAdding(true)
     try {
-      await WatchlistsAPI.addToken(id, selectedToken)
-      toast.success('Token added')
+      const item = await WatchlistsAPI.addToken(id, selectedToken)
+      // Append the new item (server orders items oldest-first).
+      setWatchlist((prev) => ({ ...prev, items: [...prev.items, item] }))
       setSelectedToken('')
-      load()
+      toast.success('Token added')
+      // Fetch just the new token's price (no full-page reload).
+      try {
+        const p = await TokensAPI.price(item.token_id)
+        setPrices((prev) => ({
+          ...prev,
+          [item.token_id]: { price: p.price, cached: p.cached },
+        }))
+      } catch {
+        setPrices((prev) => ({ ...prev, [item.token_id]: { error: true } }))
+      }
     } catch (err) {
       toast.error(err.message)
     } finally {
@@ -69,8 +80,11 @@ export default function WatchlistDetail() {
   async function handleRemove(item) {
     try {
       await WatchlistsAPI.removeToken(id, item.token_id)
+      setWatchlist((prev) => ({
+        ...prev,
+        items: prev.items.filter((i) => i.token_id !== item.token_id),
+      }))
       toast.success(`${item.token.symbol} removed`)
-      load()
     } catch (err) {
       toast.error(err.message)
     }

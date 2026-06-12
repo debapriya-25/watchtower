@@ -32,10 +32,15 @@ export default function Dashboard() {
     if (!name.trim()) return
     setCreating(true)
     try {
-      await WatchlistsAPI.create(name.trim())
+      const created = await WatchlistsAPI.create(name.trim())
+      // List is ordered oldest-first → append. `created` is a detail object;
+      // derive the summary shape the list renders (item_count).
+      setWatchlists((prev) => [
+        ...prev,
+        { ...created, item_count: created.items.length },
+      ])
       toast.success('Watchlist created')
       setName('')
-      load()
     } catch (err) {
       toast.error(err.message)
     } finally {
@@ -47,9 +52,15 @@ export default function Dashboard() {
     const next = window.prompt('Rename watchlist', wl.name)
     if (!next || next.trim() === wl.name) return
     try {
-      await WatchlistsAPI.rename(wl.id, next.trim())
+      const updated = await WatchlistsAPI.rename(wl.id, next.trim())
+      setWatchlists((prev) =>
+        prev.map((w) =>
+          w.id === updated.id
+            ? { ...w, name: updated.name, updated_at: updated.updated_at }
+            : w,
+        ),
+      )
       toast.success('Watchlist renamed')
-      load()
     } catch (err) {
       toast.error(err.message)
     }
@@ -59,8 +70,8 @@ export default function Dashboard() {
     if (!window.confirm(`Delete watchlist "${wl.name}"?`)) return
     try {
       await WatchlistsAPI.remove(wl.id)
+      setWatchlists((prev) => prev.filter((w) => w.id !== wl.id))
       toast.success('Watchlist deleted')
-      load()
     } catch (err) {
       toast.error(err.message)
     }

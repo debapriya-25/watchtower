@@ -30,9 +30,12 @@ export default function Admin() {
 
   async function toggleActive(u) {
     try {
-      await AdminAPI.setActive(u.id, !u.is_active)
-      toast.success(`${u.email} ${u.is_active ? 'deactivated' : 'activated'}`)
-      load()
+      const updated = await AdminAPI.setActive(u.id, !u.is_active)
+      // Replace the row with the server's updated user (immediate, no refetch).
+      setUsers((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))
+      toast.success(
+        `${updated.email} ${updated.is_active ? 'activated' : 'deactivated'}`,
+      )
     } catch (err) {
       toast.error(err.message)
     }

@@ -43,15 +43,16 @@ export default function Alerts() {
     }
     setCreating(true)
     try {
-      await AlertsAPI.create({
+      const created = await AlertsAPI.create({
         token_id: tokenId,
         condition,
         target_price: price,
       })
+      // List is ordered newest-first → prepend the created alert.
+      setAlerts((prev) => [created, ...prev])
       toast.success('Alert created')
       setTokenId('')
       setTargetPrice('')
-      load()
     } catch (err) {
       toast.error(err.message)
     } finally {
@@ -61,14 +62,12 @@ export default function Alerts() {
 
   async function toggleActive(alert) {
     try {
-      if (alert.is_active) {
-        await AlertsAPI.deactivate(alert.id)
-        toast.success('Alert deactivated')
-      } else {
-        await AlertsAPI.activate(alert.id)
-        toast.success('Alert reactivated')
-      }
-      load()
+      const updated = alert.is_active
+        ? await AlertsAPI.deactivate(alert.id)
+        : await AlertsAPI.activate(alert.id)
+      // Replace the row with the server's updated alert (immediate, no refetch).
+      setAlerts((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))
+      toast.success(updated.is_active ? 'Alert reactivated' : 'Alert deactivated')
     } catch (err) {
       toast.error(err.message)
     }
@@ -78,8 +77,8 @@ export default function Alerts() {
     if (!window.confirm('Delete this alert?')) return
     try {
       await AlertsAPI.remove(alert.id)
+      setAlerts((prev) => prev.filter((a) => a.id !== alert.id))
       toast.success('Alert deleted')
-      load()
     } catch (err) {
       toast.error(err.message)
     }
