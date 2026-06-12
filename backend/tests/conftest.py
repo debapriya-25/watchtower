@@ -127,3 +127,12 @@ async def user_auth(db_session: AsyncSession) -> dict[str, str]:
         db_session, email="user_test@example.com", role=UserRole.USER
     )
     return headers
+
+
+@pytest_asyncio.fixture
+async def other_user_auth(db_session: AsyncSession) -> dict[str, str]:
+    """A second, distinct regular user — used for ownership/403 tests."""
+    _user, headers = await _make_user(
+        db_session, email="other_user_test@example.com", role=UserRole.USER
+    )
+    return headers

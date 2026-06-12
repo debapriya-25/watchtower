@@ -27,7 +27,7 @@ from app.core.logging import configure_logging, get_logger
 from app.core.rate_limit import limiter
 from app.db.redis import close_redis
 from app.db.session import dispose_engine
-from app.routers import auth, health, tokens
+from app.routers import auth, health, tokens, watchlists
 
 configure_logging()
 logger = get_logger(__name__)
@@ -62,6 +62,13 @@ tags_metadata = [
             "Crypto token catalogue and live, Redis-cached prices. Listing is "
             "open to any authenticated user; creating/updating catalogue entries "
             "is admin-only."
+        ),
+    },
+    {
+        "name": "watchlists",
+        "description": (
+            "Per-user watchlists and their tokens. Strictly owner-scoped: a "
+            "user can only ever access their own watchlists (others return 403)."
         ),
     },
 ]
@@ -102,6 +109,7 @@ register_exception_handlers(app)
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(tokens.router)
+app.include_router(watchlists.router)
 
 
 @app.get("/", tags=["health"], summary="Service banner")

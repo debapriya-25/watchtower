@@ -224,7 +224,47 @@ Default seeded credentials (override via `.env`):
 .\venv\Scripts\python.exe -m pytest -q
 ```
 
+## Watchlists (Phase 3)
+
+Per-user watchlists of catalogue tokens. **Strictly owner-scoped** — a user can
+only ever access their own watchlists; touching another user's returns **403**.
+
+> Schema note: `watchlist_items` now references the catalogue via
+> `token_id` → `tokens.id` with `UNIQUE(watchlist_id, token_id)` (replacing the
+> Phase 0 `coin_id`/`symbol` placeholder columns).
+
+### Endpoints (all under `/api/v1/watchlists`, auth required)
+
+| Method & path | Description |
+|---|---|
+| `POST   /api/v1/watchlists` | Create a watchlist (name unique per user) |
+| `GET    /api/v1/watchlists` | List **my** watchlists (with token counts) |
+| `GET    /api/v1/watchlists/{id}` | Get one of my watchlists (with tokens) |
+| `PATCH  /api/v1/watchlists/{id}` | Rename a watchlist |
+| `DELETE /api/v1/watchlists/{id}` | Delete a watchlist (tokens cascade) |
+| `POST   /api/v1/watchlists/{id}/tokens` | Add a catalogue token |
+| `DELETE /api/v1/watchlists/{id}/tokens/{token_id}` | Remove a token |
+
+Errors: `403` (another user's watchlist), `404` (missing watchlist/token),
+`409` (duplicate watchlist name or token already present).
+
+```bash
+# create
+curl -X POST http://localhost:8000/api/v1/watchlists \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" -H "Content-Type: application/json" \
+  -d '{"name":"DeFi blue chips"}'
+
+# add a token (token_id from GET /api/v1/tokens)
+curl -X POST http://localhost:8000/api/v1/watchlists/<WATCHLIST_ID>/tokens \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" -H "Content-Type: application/json" \
+  -d '{"token_id":"<TOKEN_ID>"}'
+
+# remove a token
+curl -X DELETE http://localhost:8000/api/v1/watchlists/<WATCHLIST_ID>/tokens/<TOKEN_ID> \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
 ## Out of scope for this phase
 
-Watchlist CRUD and alert evaluation are intentionally **not** implemented yet —
-only their tables exist so the schema is provisioned.
+Alert evaluation is intentionally **not** implemented yet — only its table
+exists so the schema is provisioned.

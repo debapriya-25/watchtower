@@ -1,7 +1,8 @@
 """Watchlist ORM model.
 
-CRUD is intentionally not implemented in Phase 1; the table is defined here so
-the initial migration provisions the schema.
+A watchlist belongs to exactly one user; ownership is enforced in the service
+layer. ``UNIQUE(user_id, name)`` prevents a single user from creating two
+watchlists with the same name.
 """
 
 from __future__ import annotations
@@ -33,13 +34,13 @@ class Watchlist(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(String(120), nullable=False)
-    description: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="watchlists")
     items: Mapped[list["WatchlistItem"]] = relationship(
         back_populates="watchlist",
         cascade="all, delete-orphan",
         passive_deletes=True,
+        order_by="WatchlistItem.created_at",
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug helper
