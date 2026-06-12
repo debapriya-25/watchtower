@@ -1,0 +1,38 @@
+# Keep the build context small and free of secrets / local artifacts.
+
+# Virtualenvs (huge — never ship these)
+.venv/
+backend/venv/
+**/venv/
+**/.venv/
+
+# Python caches
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+**/.pytest_cache/
+
+# Secrets / local env (config is injected at runtime via compose)
+.env
+backend/.env
+**/.env
+
+# VCS & tooling
+.git/
+.gitignore
+.claude/
+.vscode/
+.idea/
+
+# Frontend (not part of the backend image)
+frontend/
+
+# Docs & misc
+docs/
+*.md
+**/*.md
+
+# OS files
+.DS_Store
+Thumbs.db
