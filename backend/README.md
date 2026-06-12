@@ -264,7 +264,43 @@ curl -X DELETE http://localhost:8000/api/v1/watchlists/<WATCHLIST_ID>/tokens/<TO
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
-## Out of scope for this phase
+## Price alerts (Phase 4)
 
-Alert evaluation is intentionally **not** implemented yet — only its table
-exists so the schema is provisioned.
+Per-user price alerts that trigger when a token crosses a target price.
+**Owner-scoped** (others return 403). Triggering is **one-shot**: when an alert
+fires it stamps `triggered_at` and sets `is_active=false`. Notification delivery
+is out of scope for this phase.
+
+> Schema note: `alerts` now references the catalogue via `token_id` → `tokens.id`
+> and uses an `is_active` boolean (replacing the Phase 0 `coin_id`/`status`
+> placeholder columns). The condition enum is `ABOVE` / `BELOW`.
+
+### Endpoints (all under `/api/v1/alerts`, auth required)
+
+| Method & path | Description |
+|---|---|
+| `POST   /api/v1/alerts` | Create an alert (`token_id`, `condition`, `target_price>0`) |
+| `GET    /api/v1/alerts` | List my alerts (newest first) |
+| `GET    /api/v1/alerts/{id}` | Get one of my alerts |
+| `PATCH  /api/v1/alerts/{id}` | Update `condition` / `target_price` |
+| `DELETE /api/v1/alerts/{id}` | Delete an alert |
+| `POST   /api/v1/alerts/{id}/activate` | Re-arm (`is_active=true`, clears `triggered_at`) |
+| `POST   /api/v1/alerts/{id}/deactivate` | Disable (`is_active=false`) |
+
+Errors: `403` (another user's alert), `404` (missing alert/token), `422`
+(`target_price <= 0`).
+
+```bash
+curl -X POST http://localhost:8000/api/v1/alerts \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" -H "Content-Type: application/json" \
+  -d '{"token_id":"<TOKEN_ID>","condition":"ABOVE","target_price":75000}'
+```
+
+### Evaluation logic
+
+`app/services/alert_service.py::evaluate_alert(alert, current_price)` holds the
+pure trigger logic (`ABOVE` → `current_price >= target`, `BELOW` →
+`current_price <= target`). On a trigger it stamps `triggered_at` and sets
+`is_active=false`; already-inactive alerts never re-trigger. There is **no**
+scheduler/worker/queue in this phase — a future background job supplies prices
+and calls this function.

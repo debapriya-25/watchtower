@@ -13,15 +13,10 @@ class UserRole(str, enum.Enum):
 
 
 class AlertCondition(str, enum.Enum):
-    """Trigger condition for a price alert."""
+    """Trigger condition for a price alert.
 
-    ABOVE = "above"
-    BELOW = "below"
+    ``ABOVE`` triggers when current price >= target; ``BELOW`` when <= target.
+    """
 
-
-class AlertStatus(str, enum.Enum):
-    """Lifecycle state of a price alert."""
-
-    ACTIVE = "active"
-    TRIGGERED = "triggered"
-    DISABLED = "disabled"
+    ABOVE = "ABOVE"
+    BELOW = "BELOW"

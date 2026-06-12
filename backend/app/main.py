@@ -27,7 +27,7 @@ from app.core.logging import configure_logging, get_logger
 from app.core.rate_limit import limiter
 from app.db.redis import close_redis
 from app.db.session import dispose_engine
-from app.routers import auth, health, tokens, watchlists
+from app.routers import alerts, auth, health, tokens, watchlists
 
 configure_logging()
 logger = get_logger(__name__)
@@ -71,6 +71,15 @@ tags_metadata = [
             "user can only ever access their own watchlists (others return 403)."
         ),
     },
+    {
+        "name": "alerts",
+        "description": (
+            "Per-user price alerts that trigger when a token crosses a target "
+            "price (ABOVE/BELOW). Owner-scoped (others return 403). Triggering "
+            "is one-shot: the alert stamps `triggered_at` and deactivates. "
+            "Notification delivery is not part of this phase."
+        ),
+    },
 ]
 
 app = FastAPI(
@@ -110,6 +119,7 @@ app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(tokens.router)
 app.include_router(watchlists.router)
+app.include_router(alerts.router)
 
 
 @app.get("/", tags=["health"], summary="Service banner")
